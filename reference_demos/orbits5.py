@@ -90,7 +90,8 @@ for i in np.arange(firstframe,firstframe+frames+1): #for all the frames
 	ax.set_xlim3d(-4,4)
 	ax.set_ylim3d(-4,4)
 	ax.set_zlim3d(-4,4)
-	savefig(fname, format='png') # save it
+	#savefig(fname, format='png') # save it
+	plt.show()
 	plt.close() # close or we get a massive memory leak
 
 	# update acceleration, vel, pos
