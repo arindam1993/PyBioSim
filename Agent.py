@@ -32,8 +32,8 @@ class Agent(object):
     def draw(self, subplot): 
         
         ##plots the sphere           
-        u = np.linspace(0, 2 * np.pi, 30)
-        v = np.linspace(0, np.pi, 30)
+        u = np.linspace(0, 2 * np.pi, 50)
+        v = np.linspace(0, np.pi, 50)
 
         x = self.drawRadius * np.outer(np.cos(u), np.sin(v)) + self.position[0]
         y = self.drawRadius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
@@ -42,7 +42,7 @@ class Agent(object):
             sphereColor = '#ff99ff'
         if self.team == "B":
             sphereColor = '#ffcc99'
-        subplot.plot_surface(x, y, z,  rstride=4, cstride=4, color=sphereColor)
+        subplot.plot_surface(x, y, z,  rstride=4, cstride=4, linewidth = 0, color=sphereColor)
         
         #plots the left handed co-ordinate Frame
         

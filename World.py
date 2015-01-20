@@ -31,8 +31,8 @@ class World(object):
             obstacle.draw(ax)
         for ball in self.balls:
             ball.draw(ax)
-        fname = imageDirName + '/' + str(int(100000000+loopIndex)) + '.png' # name the file 
-        savefig(fname, format='png')
+        fname = imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
+        savefig(fname, format='jpg')
         print 'Written'+ fname
         plt.close()
         

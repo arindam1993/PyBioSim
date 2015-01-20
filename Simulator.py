@@ -37,8 +37,8 @@ def setup():
     world = World(worldWidth, worldHeight) #Initialize the world
     
     #Defining a couple of agents 
-    ag1Pos = array([50, 20, 0])
-    ag1Rot = array([30, 0, 0])
+    ag1Pos = array([0, 0, 0])
+    ag1Rot = array([0, 0, 0])
     agent1 = Agent("A", ag1Pos, ag1Rot, 10, 10)
     
     ag2Pos = array([0, 20, 0])
