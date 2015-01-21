@@ -5,6 +5,7 @@ Created on Jan 16, 2015
 '''
 
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy import *
 from World import *
 from Agent import Agent
@@ -12,12 +13,14 @@ from Obstacle import *
 from pylab import *
 import os
 from Ball import Ball
+from matplotlib import animation
 
 
 #Called once for initialization
 def setup():
+    
     #setup directory to save the images
-    global imageDirName;
+    global imageDirName
     imageDirName = 'images'
     try:
         os.mkdir(imageDirName)
@@ -37,12 +40,12 @@ def setup():
     world = World(worldWidth, worldHeight) #Initialize the world
     
     #Defining a couple of agents 
-    ag1Pos = array([0, 0, 0])
-    ag1Rot = array([0, 0, 0])
+    ag1Pos = array([80, 50, -20])
+    ag1Rot = array([30, 0, 0])
     agent1 = Agent("A", ag1Pos, ag1Rot, 10, 10)
     
-    ag2Pos = array([0, 20, 0])
-    ag2Rot = array([-30, 0, 120])
+    ag2Pos = array([-80, 0, 0])
+    ag2Rot = array([0, 0, 0])
     agent2 = Agent("A", ag2Pos, ag2Rot, 10, 10)
     
     ag3Pos = array([70, 30, 50])
@@ -50,7 +53,7 @@ def setup():
     agent3 = Agent("B", ag3Pos, ag3Rot, 10, 10)
     
     ag4Pos = array([-80, 20, 60])
-    ag4Rot = array([0, 0, 30])
+    ag4Rot = array([0, 0, 0])
     agent4 = Agent("B", ag4Pos, ag4Rot, 10, 10)
     
     #Add the agent to the world
@@ -71,28 +74,40 @@ def setup():
     world.obstacles.append(ob2)
     
     #define a ball
-    ball = Ball(array([100, -25, 30]))
+    ball = Ball(array([0, 0, 0]))
     
     #add the ball to the world
     world.balls.append(ball)
     
+    
+    
 #Called repeatedly to create the movie
-def loop(loopIndex, imageDirName):
-    world.draw(loopIndex, imageDirName)
+def loop(loopIndex):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d') 
+    world.draw(ax)
     for agent in world.agents:
-        agent.position+=agent.forward * 10 / fps #move em forward
-
-
+        agent.position+=agent.forward  #move em forward
+        agent.moveAgent(world)
+        print agent.getEgoCentricOf(world.balls[0])
+    
+    fname = imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
+    savefig(fname, format='jpg')
+    print 'Written'+ fname
+    #plt.show()
+    plt.close()
+        
 
 
 #Simulation starts here
 setup()
+
 timeStep = double(0.0333333333333333)
 currTime = double(0)
 print timeStep
 loopIndex = 0
 while(currTime < simTime):
-    loop(loopIndex, imageDirName)
+    loop(loopIndex)
     loopIndex+=1
     print currTime
     currTime+=double(timeStep)

@@ -29,4 +29,6 @@ class Ball(object):
         y = self.radius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
         z = self.radius * np.outer(np.ones(np.size(u)), np.cos(v)) + self.position[2]
         subplot.plot_surface(x, y, z,  rstride=4, cstride=4, linewidth = 0, color='w')
+        
+        
     

@@ -18,10 +18,9 @@ class World(object):
         self.width = width
         self.height = height
         
-    def draw(self, loopIndex, imageDirName):
+    def draw(self, ax):
         
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d') 
+ 
         ax.set_xlim3d(-self.width,self.width)
         ax.set_ylim3d(-self.width,self.width)
         ax.set_zlim3d(-self.height,self.height)
@@ -31,10 +30,7 @@ class World(object):
             obstacle.draw(ax)
         for ball in self.balls:
             ball.draw(ax)
-        fname = imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
-        savefig(fname, format='jpg')
-        print 'Written'+ fname
-        plt.close()
+        return ax
         
         
 

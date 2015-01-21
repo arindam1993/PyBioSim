@@ -5,7 +5,8 @@ Created on Jan 16, 2015
 '''
 import numpy as np
 from numpy import *
-from LinearAlegebraUtils import rotMatrixFromYPR
+from numpy.linalg import *
+from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -25,6 +26,8 @@ class Agent(object):
         self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(rotation))    #unit vector in forward direction of agent
         self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(rotation))      #unit vector in right direction of agent
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
+        self.maxDeltaPos = array([1, 1, 1])             #max distance the agent can move in each frame
+        self.maxDeltaRot = array([2, 2, 2])             #max YPR in degrees the agent can rotate in each frame
  
     '''
     Plots a sphere of radius 10 with a left hand co-ordinate frame on the provided subplot.
@@ -66,3 +69,58 @@ class Agent(object):
         y_up = array([self.position[1], up[1]])
         z_up = array([self.position[2], up[2]])
         subplot.plot(x_up, y_up, z_up, color='g')
+        
+    '''
+    Returns egocentric position of other object with respect to self
+    '''
+    def getEgoCentricOf(self, otherObject):
+        otherPosition = otherObject.position;
+        rotMat = rotMatrixFromYPR(self.rotation)
+        rotMatInverse = inv(rotMat)
+        posVector = otherPosition - self.position
+        egoCentric = dot(posVector, rotMatInverse)
+        return egoCentric
+    
+    '''
+    Moves the agent, given information about the world, places restrictions on motion, called by the simulator.
+    Logic is placed in takeStep() method.
+    '''  
+    def moveAgent(self, world):
+        agentsAPos = [self.getEgoCentricOf(agent) for agent in world.agents if agent.team=="A"]    #list of agent positions in team A conveyed in egocentric co-ordinates wrt self
+        agentsBPos = [self.getEgoCentricOf(agent) for agent in world.agents if agent.team=="B"]    #list of agent positions in team B conveyed in egocentric co-ordinates wrt self
+        myIndex = 0
+        teamACount = 0
+        teamBCount = 0
+        for agent in world.agents:
+            if agent.team == "A":
+                teamACount+=1
+                if agent == self:
+                    myIndex = teamACount - 1
+            if agent.team == "B":
+                teamBCount+=1
+                if agent == self:
+                    myIndex = teamBCount - 1
+            
+                
+        ballPos = [self.getEgoCentricOf(ball) for ball in world.balls]                             #list of balls positions conveyed in egocentric co-ordinates wrt self
+        obsPos = [self.getEgoCentricOf(obstacle) for obstacle in world.obstacles]                  #list of obstacle positions conveyed in egocentric co-ordinates wrt self
+        
+        deltaPos,deltaRot = self.takeStep(myIndex, agentsAPos, agentsBPos, ballPos, obsPos)
+        
+        self.rotateAgent(deltaRot)
+        
+        
+    def takeStep(self, myIndex, agentsAPos = [], agentsBPos = [], ballPos =[], obsPos = []):
+        return ballPos[0], getYPRFromVector(ballPos[0])
+    
+    '''
+    Rotate Agent by rotation specified as YPR
+    '''
+    def rotateAgent(self, rotation):
+        self.rotation += rotation
+        self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation))    
+        self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation))      
+        self.up = cross(self.forward, self.right)
+        
+        
+    
