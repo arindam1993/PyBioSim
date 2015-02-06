@@ -6,7 +6,7 @@ Created on Jan 16, 2015
 import numpy as np
 from numpy import *
 from numpy.linalg import *
-from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector
+from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector, normalize,clampRotation
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -26,8 +26,9 @@ class Agent(object):
         self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(rotation))    #unit vector in forward direction of agent
         self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(rotation))      #unit vector in right direction of agent
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
-        self.maxDeltaPos = array([1, 1, 1])             #max distance the agent can move in each frame
-        self.maxDeltaRot = array([2, 2, 2])             #max YPR in degrees the agent can rotate in each frame
+        self.maxMove = 1             #max distance the agent can move in each frame
+        self.maxRot = array([5, 5, 5])           #max YPR in degrees the agent can rotate in each frame
+        self.brain = None
  
     '''
     Plots a sphere of radius 10 with a left hand co-ordinate frame on the provided subplot.
@@ -35,8 +36,8 @@ class Agent(object):
     def draw(self, subplot): 
         
         ##plots the sphere           
-        u = np.linspace(0, 2 * np.pi, 50)
-        v = np.linspace(0, np.pi, 50)
+        u = np.linspace(0, 2 * np.pi, 25)
+        v = np.linspace(0, np.pi, 25)
 
         x = self.drawRadius * np.outer(np.cos(u), np.sin(v)) + self.position[0]
         y = self.drawRadius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
@@ -86,41 +87,26 @@ class Agent(object):
     Logic is placed in takeStep() method.
     '''  
     def moveAgent(self, world):
-        agentsAPos = [self.getEgoCentricOf(agent) for agent in world.agents if agent.team=="A"]    #list of agent positions in team A conveyed in egocentric co-ordinates wrt self
-        agentsBPos = [self.getEgoCentricOf(agent) for agent in world.agents if agent.team=="B"]    #list of agent positions in team B conveyed in egocentric co-ordinates wrt self
-        myIndex = 0
-        teamACount = 0
-        teamBCount = 0
-        for agent in world.agents:
-            if agent.team == "A":
-                teamACount+=1
-                if agent == self:
-                    myIndex = teamACount - 1
-            if agent.team == "B":
-                teamBCount+=1
-                if agent == self:
-                    myIndex = teamBCount - 1
-            
-                
-        ballPos = [self.getEgoCentricOf(ball) for ball in world.balls]                             #list of balls positions conveyed in egocentric co-ordinates wrt self
-        obsPos = [self.getEgoCentricOf(obstacle) for obstacle in world.obstacles]                  #list of obstacle positions conveyed in egocentric co-ordinates wrt self
-        
-        deltaPos,deltaRot = self.takeStep(myIndex, agentsAPos, agentsBPos, ballPos, obsPos)
-        
+        deltaPos, deltaRot = self.brain.getMovementDecision()
+        ##clamping the values
         self.rotateAgent(deltaRot)
-        
-        
-    def takeStep(self, myIndex, agentsAPos = [], agentsBPos = [], ballPos =[], obsPos = []):
-        return ballPos[0], getYPRFromVector(ballPos[0])
+        self.moveForward(2)
+
     
     '''
     Rotate Agent by rotation specified as YPR
     '''
     def rotateAgent(self, rotation):
+        rotation = clampRotation(rotation, self.maxRot)
         self.rotation += rotation
-        self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation))    
-        self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation))      
-        self.up = cross(self.forward, self.right)
+        self.forward = normalize(dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation)))    
+        self.right = normalize(dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation)))      
+        self.up = normalize(cross(self.forward, self.right))
         
+    def moveForward(self, speed):
+        self.position = self.position + self.forward * speed
+        
+    def addBrain(self, brain):
+        self.brain = brain
         
     

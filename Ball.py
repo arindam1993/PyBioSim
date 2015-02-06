@@ -6,6 +6,7 @@ Ball or attractor
 '''
 
 import numpy as np
+from numpy.linalg.linalg import norm
 
 class Ball(object):
     '''
@@ -30,5 +31,12 @@ class Ball(object):
         z = self.radius * np.outer(np.ones(np.size(u)), np.cos(v)) + self.position[2]
         subplot.plot_surface(x, y, z,  rstride=4, cstride=4, linewidth = 0, color='w')
         
-        
+    def moveBall(self, position, speed):
+        #move the ball to specified position at the specified speed, speed is distance per frame  
+        moveVector = position - self.position
+        moveVector = moveVector/norm(moveVector)
+        self.position += moveVector * speed;
     
+    
+print norm(np.array([10, 10, 10]))
+print np.array([10, 10, 10])/norm(np.array([10, 10, 10]))
