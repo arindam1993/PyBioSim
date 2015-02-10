@@ -124,11 +124,11 @@ class Simulator(object):
             self.loop(loopIndex, ax)
             fname = self.imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
             savefig(fname, format='jpg', bbox_inches='tight')
-            print 'Written'+ fname
+            print 'Written Frame No.'+loopIndex+' to '+ fname
             #plt.show()
             plt.close()
             loopIndex+=1
-            print currTime
+#             print currTime
             currTime+=double(timeStep)
             
     

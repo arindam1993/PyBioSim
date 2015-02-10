@@ -9,6 +9,8 @@ from numpy.linalg import *
 from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector, normalize,clampRotation
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from Ball import Ball
+from Obstacle import Obstacle
 
 class Agent(object):
     '''
@@ -84,14 +86,38 @@ class Agent(object):
     
     '''
     Moves the agent, given information about the world, places restrictions on motion, called by the simulator.
-    Logic is placed in takeStep() method.
+    Logic is placed in Brain.takeStep() method.
     '''  
     def moveAgent(self, world):
-        deltaPos, deltaRot = self.brain.getMovementDecision()
+        myTeam, enemyTeam, balls, obstacles = self.buildEgoCentricRepresentationOfWorld(world)
+        deltaPos, deltaRot = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
         ##clamping the values
         self.rotateAgent(deltaRot)
         self.moveForward(2)
 
+    '''
+    Get Egocentric representation of the world
+    '''
+    
+    def buildEgoCentricRepresentationOfWorld(self, world):
+        myTeam = []
+        enemyTeam = []
+        balls = []
+        obstacles =[]
+        for agent in world.agents:
+            if agent != self:
+                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation, agent.colRadius, agent.drawRadius)
+                if agent.team == self.team:
+                    myTeam.append(agentToAppend)
+                else:
+                    enemyTeam.append(agentToAppend)
+        for ball in world.balls:
+            ballToAppend = Ball(self.getEgoCentricOf(ball))
+            balls.append(ballToAppend)
+        for obstacle in world.obstacles:
+            obstacleToAppend = Obstacle(self.getEgoCentricOf(obstacle), obstacle.radius)
+            obstacles.append(obstacleToAppend)
+        return myTeam, enemyTeam, balls, obstacles
     
     '''
     Rotate Agent by rotation specified as YPR
