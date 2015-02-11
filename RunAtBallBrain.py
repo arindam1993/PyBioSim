@@ -7,22 +7,20 @@ from Agent import Agent
 from Ball import Ball
 from Obstacle import Obstacle
 from LinearAlegebraUtils import getYPRFromVector
+import numpy as np
 class RunAtBallBrain(object):
     '''
     classdocs
     '''
 
 
-    def __init__(self, agent, world):
-        '''
-        Constructor
-        '''
-        self.agent = agent
-        self.world = world        
-        
-
+    def __init__(self):      
+        pass
+    
     def takeStep(self, myTeam=[], enemyTeam=[], balls=[], obstacles=[]):
-        return balls[0].position, getYPRFromVector(balls[0].position)
+        deltaPos = np.array([1, 0, 0])
+        deltaRot = getYPRFromVector(balls[0].position)
+        return deltaPos, deltaRot
         
 
         

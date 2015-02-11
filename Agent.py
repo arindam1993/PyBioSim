@@ -19,7 +19,7 @@ class Agent(object):
     '''
 
 
-    def __init__(self, team, position, rotation, colRadius, drawRadius):
+    def __init__(self, team, position, rotation, brain, colRadius, drawRadius):
         self.position = position        #numpy array [x, y ,z]
         self.rotation = rotation        #numpy array [yaw, pitch, roll] (in degrees)
         self.colRadius = colRadius      #float size of collision sphere
@@ -30,7 +30,7 @@ class Agent(object):
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
         self.maxMove = 1             #max distance the agent can move in each frame
         self.maxRot = array([5, 5, 5])           #max YPR in degrees the agent can rotate in each frame
-        self.brain = None
+        self.brain = brain
  
     '''
     Plots a sphere of radius 10 with a left hand co-ordinate frame on the provided subplot.
@@ -44,10 +44,7 @@ class Agent(object):
         x = self.drawRadius * np.outer(np.cos(u), np.sin(v)) + self.position[0]
         y = self.drawRadius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
         z = self.drawRadius * np.outer(np.ones(np.size(u)), np.cos(v)) + self.position[2]
-        if self.team == "A":
-            sphereColor = '#ff99ff'
-        if self.team == "B":
-            sphereColor = '#ffcc99'
+        sphereColor = self.team.color
         subplot.plot_surface(x, y, z,  rstride=4, cstride=4, linewidth = 0, color=sphereColor)
         
         #plots the left handed co-ordinate Frame
@@ -91,9 +88,8 @@ class Agent(object):
     def moveAgent(self, world):
         myTeam, enemyTeam, balls, obstacles = self.buildEgoCentricRepresentationOfWorld(world)
         deltaPos, deltaRot = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
-        ##clamping the values
         self.rotateAgent(deltaRot)
-        self.moveForward(2)
+        self.translateAgent(deltaPos, 2)
 
     '''
     Get Egocentric representation of the world
@@ -106,7 +102,7 @@ class Agent(object):
         obstacles =[]
         for agent in world.agents:
             if agent != self:
-                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation, agent.colRadius, agent.drawRadius)
+                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation, agent.brain, agent.colRadius, agent.drawRadius)
                 if agent.team == self.team:
                     myTeam.append(agentToAppend)
                 else:
@@ -123,16 +119,16 @@ class Agent(object):
     Rotate Agent by rotation specified as YPR
     '''
     def rotateAgent(self, rotation):
+        #clamping
         rotation = clampRotation(rotation, self.maxRot)
         self.rotation += rotation
         self.forward = normalize(dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation)))    
         self.right = normalize(dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation)))      
         self.up = normalize(cross(self.forward, self.right))
         
-    def moveForward(self, speed):
-        self.position = self.position + self.forward * speed
-        
-    def addBrain(self, brain):
-        self.brain = brain
-        
+    def translateAgent(self, direction, speed):
+        #clamp the direction by normalizing
+        globaldirection = dot(direction, rotMatrixFromYPR(self.rotation))
+        self.position =self.position + globaldirection * speed
+
     
