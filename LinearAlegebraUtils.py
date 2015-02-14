@@ -54,13 +54,3 @@ def clampRotation(rotation, maxRot):
             rotation[2] = -1 * maxRot[2]
     return rotation
         
-
-#testing above rotines
-vector=array([-5,1,1])
-ypr = getYPRFromVector(vector)
-print ypr
-print dot(array([1, 0, 0]), rotMatrixFromYPR(ypr))
-
-rotation = array([ 1, -1 ,1])
-rotation = clampRotation(rotation, array([2, 2, 2]))
-print "Rotation"+str(rotation)

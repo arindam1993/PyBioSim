@@ -28,7 +28,7 @@ class Agent(object):
         self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(rotation))    #unit vector in forward direction of agent
         self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(rotation))      #unit vector in right direction of agent
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
-        self.maxMove = 1             #max distance the agent can move in each frame
+        self.maxMove = double(0.6666)             #max distance the agent can move in each frame
         self.maxRot = array([5, 5, 5])           #max YPR in degrees the agent can rotate in each frame
         self.brain = brain
  
@@ -89,7 +89,7 @@ class Agent(object):
         myTeam, enemyTeam, balls, obstacles = self.buildEgoCentricRepresentationOfWorld(world)
         deltaPos, deltaRot = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
         self.rotateAgent(deltaRot)
-        self.translateAgent(deltaPos, 2)
+        self.translateAgent(deltaPos)
 
     '''
     Get Egocentric representation of the world
@@ -126,9 +126,10 @@ class Agent(object):
         self.right = normalize(dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation)))      
         self.up = normalize(cross(self.forward, self.right))
         
-    def translateAgent(self, direction, speed):
+    def translateAgent(self, direction):
         #clamp the direction by normalizing
         globaldirection = dot(direction, rotMatrixFromYPR(self.rotation))
-        self.position =self.position + globaldirection * speed
+        globaldirection = normalize(globaldirection) * self.maxMove
+        self.position =self.position + globaldirection
 
     

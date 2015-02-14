@@ -38,5 +38,3 @@ class Ball(object):
         self.position += moveVector * speed;
     
     
-print norm(np.array([10, 10, 10]))
-print np.array([10, 10, 10])/norm(np.array([10, 10, 10]))
