@@ -20,8 +20,8 @@ class Agent(object):
 
 
     def __init__(self, team, position, rotation, brain, colRadius, drawRadius):
-        self.position = position        #numpy array [x, y ,z]
-        self.rotation = rotation        #numpy array [yaw, pitch, roll] (in degrees)
+        self.position = position.astype(float)        #numpy array [x, y ,z]
+        self.rotation = rotation.astype(float)        #numpy array [yaw, pitch, roll] (in degrees)
         self.colRadius = colRadius      #float size of collision sphere
         self.drawRadius = drawRadius    #float size of sphere to be drawn
         self.team = team                #provide team 'A' or team 'B'
@@ -102,7 +102,7 @@ class Agent(object):
         obstacles =[]
         for agent in world.agents:
             if agent != self:
-                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation, agent.brain, agent.colRadius, agent.drawRadius)
+                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation - self.rotation, agent.brain, agent.colRadius, agent.drawRadius)
                 if agent.team == self.team:
                     myTeam.append(agentToAppend)
                 else:

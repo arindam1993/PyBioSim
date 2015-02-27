@@ -7,6 +7,7 @@ Ball or attractor
 
 import numpy as np
 from numpy.linalg.linalg import norm
+from LinearAlegebraUtils import normalize
 
 class Ball(object):
     '''
@@ -18,13 +19,13 @@ class Ball(object):
         '''
         Constructor
         '''
-        self.position = position
+        self.position = position.astype(float)
         self.radius = 5
         
     def draw(self,subplot):
         #draw a sphere of specified size at specified position
-        u = np.linspace(0, 2 * np.pi, 50)
-        v = np.linspace(0, np.pi, 50)
+        u = np.linspace(0, 2 * np.pi, 25)
+        v = np.linspace(0, np.pi, 25)
 
         x = self.radius * np.outer(np.cos(u), np.sin(v)) + self.position[0]
         y = self.radius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
@@ -34,7 +35,7 @@ class Ball(object):
     def moveBall(self, position, speed):
         #move the ball to specified position at the specified speed, speed is distance per frame  
         moveVector = position - self.position
-        moveVector = moveVector/norm(moveVector)
-        self.position += moveVector * speed;
+        moveVector = normalize(moveVector)
+        self.position += moveVector * float(speed)
     
     
