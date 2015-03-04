@@ -143,7 +143,7 @@ class Simulator(object):
         fname = self.imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
         self.loop(ax)
         plt.gca().set_ylim(ax.get_ylim()[::-1])
-        savefig(fname, format='jpg', bbox_inches='tight')
+        savefig(fname, format='png', bbox_inches='tight')
         print 'Written Frame No.'+ str(loopIndex)+' to '+ fname
         plt.close()
 
