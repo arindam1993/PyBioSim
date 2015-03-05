@@ -129,7 +129,8 @@ class Agent(object):
     def translateAgent(self, direction):
         #clamp the direction by normalizing
         globaldirection = dot(direction, rotMatrixFromYPR(self.rotation))
-        globaldirection = normalize(globaldirection) * self.maxMove
+        if np.linalg.norm(globaldirection) > self.maxMove:
+            globaldirection = normalize(globaldirection) * self.maxMove
         self.position =self.position + globaldirection
 
     
