@@ -158,7 +158,7 @@ sim.run()
 
 '''
 To create a video using the image sequence, execute the following command in command line.
->ffmpeg -f image2 -i "1%08d.jpg" -r 30 outPut.mp4
+>ffmpeg -f image2 -i "1%08d.png" -r 30 outPut.mp4
 Make sure to set your current working directory to /images and have ffmpeg in your path.
 '''
 
