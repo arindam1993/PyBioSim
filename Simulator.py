@@ -140,7 +140,7 @@ class Simulator(object):
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")    
-        fname = self.imageDirName + '/' + str(int(100000000+loopIndex)) + '.jpg' # name the file 
+        fname = self.imageDirName + '/' + str(int(100000000+loopIndex)) + '.png' # name the file 
         self.loop(ax)
         plt.gca().set_ylim(ax.get_ylim()[::-1])
         savefig(fname, format='png', bbox_inches='tight')
