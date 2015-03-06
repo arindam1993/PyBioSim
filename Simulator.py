@@ -1,8 +1,10 @@
 '''
-Created on Jan 16, 2015
+(c) 2015 Georgia Tech Research Corporation
+This source code is released under the New BSD license.  Please see the LICENSE.txt file included with this software for more information
 
-@author: Arindam
+authors: Arindam Bose (arindam.1993@gmail.com), Tucker Balch (trbalch@gmail.com)
 '''
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,6 +17,7 @@ from Ball import Ball
 from LinearAlegebraUtils import distBetween
 from RunAtBallBrain import RunAtBallBrain
 from Team import Team
+from SimTime import SimTime
 
 
 
@@ -88,7 +91,7 @@ class Simulator(object):
         
         #define a ball
         ball = Ball(array([0, 0, 0]))
-        
+        ball.makePhysics()
         
         #add the ball to the world
         self.world.balls.append(ball)
@@ -98,12 +101,14 @@ class Simulator(object):
         for agent in self.world.agents:
             agent.moveAgent(self.world)
          
-        for ball in self.world.balls:  
-            if len(self.ballWPs) > 0:  
-                ball.moveBall(self.ballWPs[0], 1)
-                if distBetween(ball.position, self.ballWPs[0]) < 0.5:
-                    if len(self.ballWPs) > 0:
-                        self.ballWPs.remove(self.ballWPs[0])
+        for ball in self.world.balls:
+            ball.updatePhysics()
+#         for ball in self.world.balls:  
+#             if len(self.ballWPs) > 0:  
+#                 ball.moveBall(self.ballWPs[0], 1)
+#                 if distBetween(ball.position, self.ballWPs[0]) < 0.5:
+#                     if len(self.ballWPs) > 0:
+#                         self.ballWPs.remove(self.ballWPs[0])
 
     
 #Called at specifed fps
@@ -119,10 +124,13 @@ class Simulator(object):
         timeStep = 1/double(30)
         frameProb = double(self.fps) / 30
         currTime = double(0)
+        SimTime.fixedDeltaTime = timeStep
+        SimTime.deltaTime = double(1/ self.fps)
         drawIndex = 0
         physicsIndex = 0
         while(currTime < self.simTime):
             self.fixedLoop()
+            SimTime.time = currTime
             currProb = double(drawIndex)/double(physicsIndex+1)
             if currProb < frameProb:
                 self.drawFrame(drawIndex)  
@@ -152,13 +160,13 @@ class Simulator(object):
 #set the size of the world
 world = World(100, 100)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 60, 30, "images")
+sim = Simulator(world, 120, 30, "images")
 #run the simulation
 sim.run()
 
 '''
 To create a video using the image sequence, execute the following command in command line.
->ffmpeg -f image2 -i "1%08d.png" -r 30 outPut.mp4
+>ffmpeg -f image2 -i "1%08d.jpg" -r 30 outPut.mp4
 Make sure to set your current working directory to /images and have ffmpeg in your path.
 '''
 

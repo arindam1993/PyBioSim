@@ -1,8 +1,10 @@
 '''
-Created on Jan 16, 2015
-Some junk linear alegebra methods.
-@author: Arindam
+(c) 2015 Georgia Tech Research Corporation
+This source code is released under the New BSD license.  Please see the LICENSE.txt file included with this software for more information
+
+authors: Arindam Bose (arindam.1993@gmail.com), Tucker Balch (trbalch@gmail.com)
 '''
+
 
 from numpy import *
 import numpy as np
@@ -53,4 +55,7 @@ def clampRotation(rotation, maxRot):
         if -1 * rotation[2] > maxRot[2]:
             rotation[2] = -1 * maxRot[2]
     return rotation
+
+def reflectVector(vector, normal):
+    return -2 * dot(vector, normal) * np.linalg.norm(normal) + vector
         

@@ -1,16 +1,20 @@
 '''
-Created on Jan 16, 2015
+(c) 2015 Georgia Tech Research Corporation
+This source code is released under the New BSD license.  Please see the LICENSE.txt file included with this software for more information
 
-@author: Arindam
+authors: Arindam Bose (arindam.1993@gmail.com), Tucker Balch (trbalch@gmail.com)
 '''
+
 import numpy as np
 from numpy import *
 from numpy.linalg import *
-from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector, normalize,clampRotation
+from LinearAlegebraUtils import rotMatrixFromYPR, getYPRFromVector, normalize,clampRotation,\
+    distBetween
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from Ball import Ball
 from Obstacle import Obstacle
+from SimTime import SimTime
 
 class Agent(object):
     '''
@@ -31,6 +35,10 @@ class Agent(object):
         self.maxMove = double(0.6666)             #max distance the agent can move in each frame
         self.maxRot = array([5, 5, 5])           #max YPR in degrees the agent can rotate in each frame
         self.brain = brain
+        self.uid = id(self)            #unique identifier
+        self.isStunned = False
+        self.lastStunned = float(-1)          #Last time agent was stunned
+        self.stunDuration = float(-1)         #Duration for which I am stunned
  
     '''
     Plots a sphere of radius 10 with a left hand co-ordinate frame on the provided subplot.
@@ -44,7 +52,10 @@ class Agent(object):
         x = self.drawRadius * np.outer(np.cos(u), np.sin(v)) + self.position[0]
         y = self.drawRadius * np.outer(np.sin(u), np.sin(v)) + self.position[1]
         z = self.drawRadius * np.outer(np.ones(np.size(u)), np.cos(v)) + self.position[2]
-        sphereColor = self.team.color
+        if not self.isStunned:
+            sphereColor = self.team.color
+        else:
+            sphereColor = 'r'
         subplot.plot_surface(x, y, z,  rstride=4, cstride=4, linewidth = 0, color=sphereColor)
         
         #plots the left handed co-ordinate Frame
@@ -87,9 +98,35 @@ class Agent(object):
     '''  
     def moveAgent(self, world):
         myTeam, enemyTeam, balls, obstacles = self.buildEgoCentricRepresentationOfWorld(world)
-        deltaPos, deltaRot = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
-        self.rotateAgent(deltaRot)
-        self.translateAgent(deltaPos)
+        deltaPos, deltaRot, actions = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
+        #handle movements
+        if not self.isStunned:
+            self.rotateAgent(deltaRot)
+            self.translateAgent(deltaPos)
+            
+        #handle actions
+        if not self.isStunned:
+            for action in actions:
+                #handle stun action
+                if action.__class__.__name__ == 'Stun':
+                    for agent in world.agents:
+                        if agent.getUID() == action.agentUID:
+                            if distBetween(self.position, agent.position) < 15:
+                                agent.stun(action.duration)
+                #handle kick action
+                if action.__class__.__name__ == 'Kick':
+                    for ball in world.balls:
+                        if ball.getUID() == action.ballUID:
+                            if distBetween(self.position, ball.position) < 10:
+                                globalDirection = dot(action.direction, rotMatrixFromYPR(self.rotation))
+                                ball.kick(globalDirection, action.intensity)
+        #Unstun Self
+        if self.isStunned:
+            if not (self.lastStunned == -1 and self.stunDuration == -1):
+                if SimTime.time - self.lastStunned > float(self.stunDuration):
+                    self.isStunned = False
+                    self.lastStunned = -1
+                    self.stunDuration = -1
 
     '''
     Get Egocentric representation of the world
@@ -103,12 +140,14 @@ class Agent(object):
         for agent in world.agents:
             if agent != self:
                 agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation - self.rotation, agent.brain, agent.colRadius, agent.drawRadius)
+                agentToAppend.setUID(agent.getUID())
                 if agent.team == self.team:
                     myTeam.append(agentToAppend)
                 else:
                     enemyTeam.append(agentToAppend)
         for ball in world.balls:
             ballToAppend = Ball(self.getEgoCentricOf(ball))
+            ballToAppend.setUID(ball.getUID())
             balls.append(ballToAppend)
         for obstacle in world.obstacles:
             obstacleToAppend = Obstacle(self.getEgoCentricOf(obstacle), obstacle.radius)
@@ -120,17 +159,32 @@ class Agent(object):
     '''
     def rotateAgent(self, rotation):
         #clamping
-        rotation = clampRotation(rotation, self.maxRot)
-        self.rotation += rotation
-        self.forward = normalize(dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation)))    
-        self.right = normalize(dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation)))      
-        self.up = normalize(cross(self.forward, self.right))
+        if not self.isStunned:
+            rotation = clampRotation(rotation, self.maxRot)
+            self.rotation += rotation
+            self.forward = normalize(dot(array([1, 0, 0]), rotMatrixFromYPR(self.rotation)))    
+            self.right = normalize(dot(array([0, 1, 0]), rotMatrixFromYPR(self.rotation)))      
+            self.up = normalize(cross(self.forward, self.right))
         
     def translateAgent(self, direction):
         #clamp the direction by normalizing
-        globaldirection = dot(direction, rotMatrixFromYPR(self.rotation))
-        if np.linalg.norm(globaldirection) > self.maxMove:
+        if not self.isStunned:
+            globaldirection = dot(direction, rotMatrixFromYPR(self.rotation))
             globaldirection = normalize(globaldirection) * self.maxMove
-        self.position =self.position + globaldirection
+            self.position =self.position + globaldirection
+            
+    '''
+    Stun self for duration
+    '''
+    def stun(self, duration):
+        self.isStunned = True
+        self.lastStunned = SimTime.time
+        self.stunDuration = duration
+        
+    def setUID(self, uid):
+        self.uid = uid
+    
+    def getUID(self):
+        return self.uid
 
     
