@@ -57,5 +57,8 @@ def clampRotation(rotation, maxRot):
     return rotation
 
 def reflectVector(vector, normal):
-    return -2 * dot(vector, normal) * np.linalg.norm(normal) + vector
+    return -2 * dot(vector, normal) * normal + vector
         
+        
+incident = array([0, 0 , 1])
+print reflectVector(incident, array([0, 0, -1]))

@@ -39,6 +39,8 @@ class Agent(object):
         self.isStunned = False
         self.lastStunned = float(-1)          #Last time agent was stunned
         self.stunDuration = float(-1)         #Duration for which I am stunned
+        self.stunRange = 15
+
  
     '''
     Plots a sphere of radius 10 with a left hand co-ordinate frame on the provided subplot.
@@ -111,13 +113,13 @@ class Agent(object):
                 if action.__class__.__name__ == 'Stun':
                     for agent in world.agents:
                         if agent.getUID() == action.agentUID:
-                            if distBetween(self.position, agent.position) < 15:
+                            if distBetween(self.position, agent.position) < self.stunRange:
                                 agent.stun(action.duration)
                 #handle kick action
                 if action.__class__.__name__ == 'Kick':
                     for ball in world.balls:
                         if ball.getUID() == action.ballUID:
-                            if distBetween(self.position, ball.position) < 10:
+                            if distBetween(self.position, ball.position) < 20:
                                 globalDirection = dot(action.direction, rotMatrixFromYPR(self.rotation))
                                 ball.kick(globalDirection, action.intensity)
         #Unstun Self

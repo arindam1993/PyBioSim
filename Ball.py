@@ -8,7 +8,7 @@ authors: Arindam Bose (arindam.1993@gmail.com), Tucker Balch (trbalch@gmail.com)
 
 import numpy as np
 from numpy.linalg.linalg import norm
-from LinearAlegebraUtils import normalize, reflectVector
+from LinearAlegebraUtils import normalize, reflectVector, distBetween
 from numpy import array
 from SimTime import SimTime
 from numpy import *
@@ -46,35 +46,53 @@ class Ball(object):
             moveVector = normalize(moveVector)
             self.position += moveVector * float(speed)
             
-    def updatePhysics(self):
+    def updatePhysics(self, world):
         if not self.isKinematic:
+            #move with velocity
             self.position += self.velocity * SimTime.fixedDeltaTime
 #             print "Ballin to"+str(self.velocity * SimTime.fixedDeltaTime)
             self.velocity *= 0.99  
 
-            #Handle floor collisions
-            if self.position[2] < -100:
-                self.position[2] = -100 + 0.1
+            #Handle collisions with world bounds
+            if self.position[2] < -world.height:
+                self.position[2] = -world.height + 0.1
                 self.velocity = reflectVector(self.velocity, array([0, 0, 1]))
-            if self.position[2] > 100:
-                self.position[2] = 100 - 0.1
+            if self.position[2] > world.height:
+                self.position[2] = world.height - 0.1
                 self.velocity = reflectVector(self.velocity, array([0, 0, -1]))
-            if self.position[1] < -100:
-                self.position[1] = -100 + 0.1
+            if self.position[1] < -world.width:
+                self.position[1] = -world.width + 0.1
                 self.velocity = reflectVector(self.velocity, array([0, 1, 0]))
-            if self.position[1] > 100:
-                self.position[1] = 100 - 0.1
+            if self.position[1] > world.width:
+                self.position[1] = world.width - 0.1
                 self.velocity = reflectVector(self.velocity, array([0, -1, 0]))
-            if self.position[0] < -100:
-                self.position[0] = -100 + 0.1
+            if self.position[0] < -world.width:
+                self.position[0] = -world.width + 0.1
                 self.velocity = reflectVector(self.velocity, array([1, 0, 0]))
-            if self.position[0] > 100:
-                self.position[0] = 100 - 0.1
+            if self.position[0] > world.width:
+                self.position[0] = world.width - 0.1
                 self.velocity = reflectVector(self.velocity, array([-1, 0, 0]))
+            
+            #collision of obstacles
+            for obstacle in world.obstacles:
+                nextPos = self.position + self.velocity
+                if distBetween(nextPos, obstacle.position) < self.radius + obstacle.radius:
+                    normal = normalize(nextPos - obstacle.position)
+                    self.velocity = reflectVector(self.velocity, normal)
+                    
+            
+            #stop when ball hits agents
+            for agent in world.agents:
+                nextPos = self.position + self.velocity
+                if distBetween(nextPos, agent.position) < self.radius + agent.colRadius:
+                    self.velocity = array([0, 0, 0])
+                    
             #clamp ball speed
             mag = np.linalg.norm(self.velocity)
             if mag > 200:
                 self.velocity = normalize(self.velocity) * 200
+                
+            print self.velocity
             
             
     def kick(self, direction, intensity):
@@ -88,7 +106,5 @@ class Ball(object):
     def setUID(self, uid):
         self.uid = uid
         
-    def makePhysics(self):
-        self.isKinematic = False
     
     

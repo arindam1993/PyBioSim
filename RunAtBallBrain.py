@@ -24,10 +24,10 @@ class RunAtBallBrain(object):
         actions = []
         deltaPos = np.array([1, 0, 0])
         deltaRot = getYPRFromVector(balls[0].position)
-        myTeamName = myTeam[0].team.name
-        for agent in enemyTeam:
-            if myTeamName == 'A':
-                actions.append(Stun(agent, 10))
+#         myTeamName = myTeam[0].team.name
+#         for agent in enemyTeam:
+#             if myTeamName == 'A':
+#                 actions.append(Stun(agent, 10))
         for ball in balls:
             actions.append(Kick(ball, np.array([1, 0, 0]), 100))
         return deltaPos, deltaRot, actions

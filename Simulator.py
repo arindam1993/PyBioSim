@@ -60,12 +60,12 @@ class Simulator(object):
         ag2Rot = array([0, 0, 0])
         ag2Brain = RunAtBallBrain()
         agent2 = Agent(teamA, ag2Pos, ag2Rot, ag2Brain, 5, 5)
-         
+          
         ag3Pos = array([70, 30, 50])
         ag3Rot = array([0, 0, 0])
         ag3Brain = RunAtBallBrain()
         agent3 = Agent(teamB, ag3Pos, ag3Rot, ag3Brain, 5, 5)
-         
+          
         ag4Pos = array([-80, 20, 60])
         ag4Rot = array([0, 0, 0])
         ag4Brain = RunAtBallBrain()
@@ -91,7 +91,7 @@ class Simulator(object):
         
         #define a ball
         ball = Ball(array([0, 0, 0]))
-        ball.makePhysics()
+        ball.isKinematic = False
         
         #add the ball to the world
         self.world.balls.append(ball)
@@ -100,9 +100,8 @@ class Simulator(object):
     def fixedLoop(self):
         for agent in self.world.agents:
             agent.moveAgent(self.world)
-         
         for ball in self.world.balls:
-            ball.updatePhysics()
+            ball.updatePhysics(self.world)
 #         for ball in self.world.balls:  
 #             if len(self.ballWPs) > 0:  
 #                 ball.moveBall(self.ballWPs[0], 1)
@@ -160,13 +159,13 @@ class Simulator(object):
 #set the size of the world
 world = World(100, 100)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 120, 30, "images")
+sim = Simulator(world, 30, 30, "images")
 #run the simulation
 sim.run()
 
 '''
 To create a video using the image sequence, execute the following command in command line.
->ffmpeg -f image2 -i "1%08d.jpg" -r 30 outPut.mp4
+>ffmpeg -f image2 -i "1%08d.jpg" -r 10 outPut.mp4
 Make sure to set your current working directory to /images and have ffmpeg in your path.
 '''
 
