@@ -92,7 +92,6 @@ class Ball(object):
             if mag > 200:
                 self.velocity = normalize(self.velocity) * 200
                 
-            print self.velocity
             
             
     def kick(self, direction, intensity):
