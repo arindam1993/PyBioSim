@@ -39,7 +39,6 @@ class Simulator(object):
 
     def setup(self):    
         #setup directory to save the images
-        self.imageDirName = 'images'
         try:
             os.mkdir(self.imageDirName)
         except:
@@ -91,7 +90,7 @@ class Simulator(object):
         
         #define a ball
         ball = Ball(array([0, 0, 0]))
-        ball.isKinematic = False
+        ball.isDynamic = True
         
         #add the ball to the world
         self.world.balls.append(ball)
@@ -159,13 +158,15 @@ class Simulator(object):
 #set the size of the world
 world = World(100, 100)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 30, 30, "images")
+sim = Simulator(world, 120, 30, "images")
 #run the simulation
 sim.run()
 
 '''
 To create a video using the image sequence, execute the following command in command line.
->ffmpeg -f image2 -i "1%08d.jpg" -r 10 outPut.mp4
+>ffmpeg -framerate 30 -i "1%08d.png" -r 30 outPut.mp4
+                    ^                    ^
+                Framerate mtached with simulator
 Make sure to set your current working directory to /images and have ffmpeg in your path.
 '''
 

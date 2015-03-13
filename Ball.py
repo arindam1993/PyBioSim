@@ -26,7 +26,7 @@ class Ball(object):
         self.position = position.astype(double)
         self.radius = 5
         self.uid = id(self)
-        self.isKinematic = True
+        self.isDynamic = False
         self.velocity = array([0, 0, 0])
         
     def draw(self,subplot):
@@ -41,13 +41,13 @@ class Ball(object):
         
     def moveBall(self, position, speed):
         #move the ball to specified position at the specified speed, speed is distance per frame  
-        if self.isKinematic:
+        if not self.isDynamic:
             moveVector = position - self.position
             moveVector = normalize(moveVector)
             self.position += moveVector * float(speed)
             
     def updatePhysics(self, world):
-        if not self.isKinematic:
+        if self.isDynamic:
             #move with velocity
             self.position += self.velocity * SimTime.fixedDeltaTime
 #             print "Ballin to"+str(self.velocity * SimTime.fixedDeltaTime)
@@ -96,7 +96,7 @@ class Ball(object):
             
     def kick(self, direction, intensity):
         directionNorm = normalize(direction)
-        if not self.isKinematic:
+        if self.isDynamic:
             self.velocity = directionNorm * intensity
         
     def getUID(self):
