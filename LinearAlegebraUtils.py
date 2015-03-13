@@ -11,7 +11,7 @@ import numpy as np
 
 def rotMatrixFromYPR(rotation):
     a = math.radians(rotation[0])
-    b = -math.radians(rotation[1])
+    b = math.radians(rotation[1])
     c = math.radians(rotation[2])
     rotMat = array([
                     [math.cos(a)*math.cos(b), math.cos(a)*math.sin(b)*math.sin(c) - math.sin(a)*math.cos(c), math.cos(a)*math.sin(b)*math.cos(c) + math.sin(a)*math.sin(c)],
@@ -23,7 +23,7 @@ def rotMatrixFromYPR(rotation):
 def getYPRFromVector(vector):
     mag = math.sqrt(vector[0]*vector[0] + vector[1]*vector[1] )
     yaw = math.degrees(math.atan2(vector[1],vector[0]))
-    pitch = math.degrees(math.atan2(vector[2], mag))
+    pitch = -math.degrees(math.atan2(vector[2], mag))
     roll = 0
     return array([yaw, pitch, roll])
 
