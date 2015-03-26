@@ -12,7 +12,7 @@ from LinearAlegebraUtils import *
 import numpy as np
 from Action import Stun, Kick
 import random
-from NavUtils import getObstacleAvoidance
+from NavUtils import getObstacleAvoidance, findNearestUnstunned, getTeamAvoidance
 class PredatorBrain(object):
     '''
     classdocs
@@ -25,16 +25,17 @@ class PredatorBrain(object):
     def takeStep(self, myTeam=[], enemyTeam=[], balls=[], obstacles=[]):
         actions = []
         deltaPos = np.array([1, 0, 0])
-        nearestUnstunnedAgent = self.findNearestUnstunned(enemyTeam)
+        nearestUnstunnedAgent = findNearestUnstunned(enemyTeam)
         stunMovement = array([0, 0, 0])
         if nearestUnstunnedAgent.isStunned:
             stunMovement  = array([0, 0, 0])
         else:
             stunMovement = nearestUnstunnedAgent.position
 
-        avoidMovement = getObstacleAvoidance(obstacles)
+        avoidObstacleMovement = getObstacleAvoidance(obstacles)
+        avoidTeamMovement = getTeamAvoidance(myTeam)
 
-        movement = normalize(1.5*stunMovement + 0.5*avoidMovement)
+        movement = normalize(1.5*stunMovement + 0.5*avoidObstacleMovement + 0.5*avoidTeamMovement)
         deltaRot = getYPRFromVector(movement)
         actions.append(Stun(nearestUnstunnedAgent, 5))
 
@@ -43,12 +44,5 @@ class PredatorBrain(object):
 
 
 
-    def findNearestUnstunned(self, agents):
-        currAgent = agents[0]
-        for agent in agents:
-            if not agent.isStunned:
-                if np.linalg.norm(agent.position) < np.linalg.norm(currAgent.position):
-                    currAgent = agent
-        return currAgent;
 
         

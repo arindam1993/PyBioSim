@@ -158,7 +158,7 @@ class Simulator(object):
 #set the size of the world
 world = World(150, 150)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 30, 30, "images")
+sim = Simulator(world, 60, 30, "images")
 #run the simulation
 sim.run()
 
