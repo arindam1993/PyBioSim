@@ -15,9 +15,11 @@ from Obstacle import *
 from pylab import *
 from Ball import Ball
 from LinearAlegebraUtils import distBetween
-from RunAtBallBrain import RunAtBallBrain
+from PreyBrain import PreyBrain
+from PredatorBrain import PredatorBrain
 from Team import Team
 from SimTime import SimTime
+from StatsTracker import StatsTracker
 
 
 
@@ -46,35 +48,32 @@ class Simulator(object):
 
   
          #define teams which the agents can be a part of
-        teamA = Team("A", '#ff99ff')
-        teamB = Team("B", '#ffcc99')
+        predator = Team("Predator", '#ff99ff')
+        prey = Team("Prey", '#ffcc99')
         #Defining a couple of agents 
-        ag1Pos = array([80, 50, -20])
-        ag1Rot = array([30, 0, 0])
-        ag1Brain = RunAtBallBrain()
-        agent1 = Agent(teamA, ag1Pos, ag1Rot, ag1Brain, 5, 5)
-         
-         
-        ag2Pos = array([-80, 0, 0])
-        ag2Rot = array([0, 0, 0])
-        ag2Brain = RunAtBallBrain()
-        agent2 = Agent(teamA, ag2Pos, ag2Rot, ag2Brain, 5, 5)
-          
-        ag3Pos = array([70, 30, 50])
-        ag3Rot = array([0, 0, 0])
-        ag3Brain = RunAtBallBrain()
-        agent3 = Agent(teamB, ag3Pos, ag3Rot, ag3Brain, 5, 5)
-          
-        ag4Pos = array([-80, 20, 60])
-        ag4Rot = array([0, 0, 0])
-        ag4Brain = RunAtBallBrain()
-        agent4 = Agent(teamB, ag4Pos, ag4Rot, ag4Brain, 5, 5)
-         
-        #Add the agent to the world
-        self.world.agents.append(agent1)
-        self.world.agents.append(agent2)
-        self.world.agents.append(agent3)
-        self.world.agents.append(agent4)
+
+        #predator and prey counts
+        predatorCount = 5
+        preyCount = 10
+        displacement = array([0, 30, 0])
+
+        #initial seed positions
+        predatorPos = array([0, 0, 0])
+        preyPos = array([-120, -80, -80])
+
+        #initialize predators
+        for i in range(0, predatorCount):
+            brain = PredatorBrain()
+            agent = Agent(predator, predatorPos, array([0, 0, 0]), brain, 5, 5, 5)
+            self.world.addAgent(agent)
+            predatorPos+=displacement
+
+        #initialize prey
+        for i in range(0, preyCount):
+            brain = PreyBrain()
+            agent = Agent(prey, preyPos, array([0, 0, 0]), brain, 2, 2, 2)
+            self.world.addAgent(agent)
+            preyPos+=displacement
 
 #         
         #define a bunch of obstacles
@@ -85,28 +84,27 @@ class Simulator(object):
         ob2 = Obstacle(ob2Pos, 20)
          
         #add obstacles to the world
-        self.world.obstacles.append(ob1);
-        self.world.obstacles.append(ob2)
+        self.world.addObstacle(ob1)
+        self.world.addObstacle(ob2)
         
         #define a ball
         ball = Ball(array([0, 0, 0]))
-        ball.isDynamic = True
         
         #add the ball to the world
-        self.world.balls.append(ball)
+        self.world.addBall(ball)
         
 #called at a fixed 30fps always
     def fixedLoop(self):
         for agent in self.world.agents:
             agent.moveAgent(self.world)
-        for ball in self.world.balls:
-            ball.updatePhysics(self.world)
-#         for ball in self.world.balls:  
-#             if len(self.ballWPs) > 0:  
-#                 ball.moveBall(self.ballWPs[0], 1)
-#                 if distBetween(ball.position, self.ballWPs[0]) < 0.5:
-#                     if len(self.ballWPs) > 0:
-#                         self.ballWPs.remove(self.ballWPs[0])
+
+        for ball in self.world.balls:  
+            if len(self.ballWPs) > 0:  
+                ball.moveBall(self.ballWPs[self.currWP], 1)
+                if distBetween(ball.position, self.ballWPs[self.currWP]) < 0.5:
+                    self.currWP = (self.currWP + 1)%len(self.ballWPs)
+                    # if len(self.ballWPs) > 0:
+                    #     self.ballWPs.remove(self.ballWPs[0])
 
     
 #Called at specifed fps
@@ -135,9 +133,11 @@ class Simulator(object):
                 drawIndex+=1
             physicsIndex+=1
             currTime+=double(timeStep)
+
      
         print "Physics ran for "+str(physicsIndex)+" steps"
         print "Drawing ran for "+str(drawIndex)+" steps"
+        print "Agents were stunned for"+str(StatsTracker.stunTimeDict)
             
     def drawFrame(self, loopIndex):
         fig = plt.figure(figsize=(16,12))
@@ -156,9 +156,9 @@ class Simulator(object):
 
 #Simulation runs here
 #set the size of the world
-world = World(100, 100)
+world = World(150, 150)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 120, 30, "images")
+sim = Simulator(world, 30, 30, "images")
 #run the simulation
 sim.run()
 

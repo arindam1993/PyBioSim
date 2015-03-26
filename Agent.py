@@ -15,6 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from Ball import Ball
 from Obstacle import Obstacle
 from SimTime import SimTime
+from StatsTracker import StatsTracker
 
 class Agent(object):
     '''
@@ -23,7 +24,7 @@ class Agent(object):
     '''
 
 
-    def __init__(self, team, position, rotation, brain, colRadius, drawRadius):
+    def __init__(self, team, position, rotation, brain, turnRate, colRadius, drawRadius):
         self.position = position.astype(float)        #numpy array [x, y ,z]
         self.rotation = rotation.astype(float)        #numpy array [yaw, pitch, roll] (in degrees)
         self.colRadius = colRadius      #float size of collision sphere
@@ -33,7 +34,8 @@ class Agent(object):
         self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(rotation))      #unit vector in right direction of agent
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
         self.maxMove = double(0.6666)             #max distance the agent can move in each frame
-        self.maxRot = array([5, 5, 5])           #max YPR in degrees the agent can rotate in each frame
+        self.turnRate = turnRate
+        self.maxRot = array([turnRate, turnRate, turnRate])           #max YPR in degrees the agent can rotate in each frame
         self.brain = brain
         self.uid = id(self)            #unique identifier
         self.isStunned = False
@@ -141,8 +143,10 @@ class Agent(object):
         obstacles =[]
         for agent in world.agents:
             if agent != self:
-                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation - self.rotation, agent.brain, agent.colRadius, agent.drawRadius)
+                agentToAppend = Agent(agent.team, self.getEgoCentricOf(agent), agent.rotation - self.rotation, agent.brain, agent.turnRate, agent.colRadius, agent.drawRadius)
                 agentToAppend.setUID(agent.getUID())
+                if agent.isStunned:
+                    agentToAppend.isStunned = True
                 if agent.team == self.team:
                     myTeam.append(agentToAppend)
                 else:
@@ -179,9 +183,12 @@ class Agent(object):
     Stun self for duration
     '''
     def stun(self, duration):
-        self.isStunned = True
-        self.lastStunned = SimTime.time
-        self.stunDuration = duration
+        #Not re-stun if I am already stunned
+        if  not self.isStunned:
+            self.isStunned = True
+            self.lastStunned = SimTime.time
+            self.stunDuration = duration
+            StatsTracker.stunTimeDict[self] += duration
         
     def setUID(self, uid):
         self.uid = uid

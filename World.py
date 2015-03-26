@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pylab import *
 import os
+from StatsTracker import StatsTracker
+
 
 class World(object):
     
@@ -33,6 +35,18 @@ class World(object):
         for ball in self.balls:
             ball.draw(ax)
         return ax
+
+
+    def addAgent(self, agent):
+        self.agents.append(agent)
+        #add entry to stats tracker
+        StatsTracker.stunTimeDict[agent] = 0
+
+    def addBall(self, ball):
+        self.balls.append(ball)
+
+    def addObstacle(self, obstacle):
+        self.obstacles.append(obstacle)
         
         
 
