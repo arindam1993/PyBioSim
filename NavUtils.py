@@ -37,12 +37,12 @@ def findNearestUnstunned(agents):
 
 
 def getTeamAvoidance(team):
-    checkRange = 40
+    checkRange = 50
     vecSum = np.array([0, 0, 0])
     for agent in team:
         dist = np.linalg.norm(agent.position)
         if dist < checkRange:
             if(dist < 0.1):
                 dist=0.1
-            vecSum+=normalize(agent.position)*10/dist
+            vecSum+=normalize(agent.position)*20/dist
     return vecSum * -1;
