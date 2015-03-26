@@ -11,7 +11,7 @@ from Obstacle import Obstacle
 from LinearAlegebraUtils import getYPRFromVector
 import numpy as np
 from Action import Stun, Kick
-from NavUtils import getObstacleAvoidance
+from NavUtils import getObstacleAvoidance, getTeamNearestAvoidance
 class PreyBrain(object):
     '''
     classdocs
@@ -26,7 +26,8 @@ class PreyBrain(object):
         deltaPos = np.array([1, 0, 0])
         ballMovement = balls[0].position
         avoidMovement = getObstacleAvoidance(obstacles)
-        movement = 1.5*ballMovement  + 0.8*avoidMovement
+        avoidEnemyMovement = getTeamNearestAvoidance(enemyTeam)
+        movement = ballMovement  + 1.5*avoidMovement + 3.0 * avoidEnemyMovement
         deltaRot = getYPRFromVector(movement)
         
         return deltaPos, deltaRot, actions

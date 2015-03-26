@@ -16,11 +16,11 @@ def getObstacleAvoidance(obstacles):
         if np.linalg.norm(obstacle.position) < np.linalg.norm(currObstacle.position):
              currObstacle = obstacle;
     #distance to surface
-    distToSurface = np.linalg.norm(currObstacle.position) - obstacle.radius;
+    distToSurface = np.linalg.norm(currObstacle.position) - currObstacle.radius;
     if(distToSurface < 0.1):
         distToSurface = 0.1
     mag = 20/distToSurface;
-    direction = obstacle.position * -1
+    direction = currObstacle.position * -1
     if mag < 0:
         mag = 0
     return mag * direction;
@@ -46,3 +46,18 @@ def getTeamAvoidance(team):
                 dist=0.1
             vecSum+=normalize(agent.position)*20/dist
     return vecSum * -1;
+
+def getTeamNearestAvoidance(team):
+    currAgent = team[0]
+    for agent in team:
+        if np.linalg.norm(agent.position) < np.linalg.norm(currAgent.position):
+             currAgent = agent;
+    #distance to surface
+    distToSurface = np.linalg.norm(currAgent.position) - currAgent.colRadius;
+    if(distToSurface < 0.1):
+        distToSurface = 0.1
+    mag = 20/distToSurface;
+    direction = currAgent.position * -1
+    if mag < 0:
+        mag = 0
+    return mag * direction;
