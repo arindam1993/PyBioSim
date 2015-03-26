@@ -28,7 +28,7 @@ class PredatorBrain(object):
         nearestUnstunnedAgent = self.findNearestUnstunned(enemyTeam)
         stunMovement = array([0, 0, 0])
         if nearestUnstunnedAgent.isStunned:
-            stunMovement  = array([random.random(), random.random(), random.random()])
+            stunMovement  = array([0, 0, 0])
         else:
             stunMovement = nearestUnstunnedAgent.position
 
