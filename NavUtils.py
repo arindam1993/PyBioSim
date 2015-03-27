@@ -61,3 +61,15 @@ def getTeamNearestAvoidance(team):
     if mag < 0:
         mag = 0
     return mag * direction;
+
+
+def getRestrictionField(originObject, restrictionRange):
+    pos = originObject.position
+    dist = np.linalg.norm(pos)
+    direction = normalize(pos)
+    mag = 0
+    if dist > (0.8)*restrictionRange:
+        mag = dist
+    else:
+        mag = 0
+    return mag*direction

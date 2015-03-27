@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import *
 from World import *
-from Agent import Agent
+from Agent import Agent, RestrictedAgent
 from Obstacle import *
 from pylab import *
 from Ball import Ball
@@ -55,11 +55,11 @@ class Simulator(object):
         #predator and prey counts
         predatorCount = 5
         preyCount = 10
-        displacement = array([0, 30, 0])
+        displacement = array([0, 20, 0])
 
         #initial seed positions
-        predatorPos = array([0, 0, 0])
-        preyPos = array([-120, -80, -80])
+        predatorPos = array([100, 100, 0])
+        preyPos = array([0, 0, 0])
 
         #initialize predators
         for i in range(0, predatorCount):
@@ -71,7 +71,7 @@ class Simulator(object):
         #initialize prey
         for i in range(0, preyCount):
             brain = PreyBrain()
-            agent = Agent(prey, preyPos, array([0, 0, 0]), brain, 2, 2, 2)
+            agent = RestrictedAgent(prey, preyPos, array([0, 0, 0]), brain, 2, 200, 2, 2)
             self.world.addAgent(agent)
             preyPos+=displacement
 
@@ -82,16 +82,13 @@ class Simulator(object):
          
         ob2Pos = array([80,-50,-50])
         ob2 = Obstacle(ob2Pos, 20)
+
+        originRef = Obstacle(array([0.1, 0.1, 0.1]), 10)
          
         #add obstacles to the world
         self.world.addObstacle(ob1)
-        self.world.addObstacle(ob2)
+        self.world.addObstacle(originRef)
         
-        #define a ball
-        ball = Ball(array([0, 0, 0]))
-        
-        #add the ball to the world
-        self.world.addBall(ball)
         
 #called at a fixed 30fps always
     def fixedLoop(self):
@@ -158,7 +155,7 @@ class Simulator(object):
 #set the size of the world
 world = World(150, 150)
 #specify which world to simulate, total simulation time, and frammerate for video
-sim = Simulator(world, 60, 30, "images")
+sim = Simulator(world, 120, 30, "images")
 #run the simulation
 sim.run()
 

@@ -196,4 +196,44 @@ class Agent(object):
     def getUID(self):
         return self.uid
 
+
+class RestrictedAgent(Agent):
+    
+    def __init__(self, team, position, rotation, brain, turnRate, maxDistance, colRadius, drawRadius):
+        Agent.__init__(self, team, position, rotation, brain, turnRate, colRadius, drawRadius)
+        self.maxDistance = maxDistance
+
+    def moveAgent(self, world):
+        myTeam, enemyTeam, balls, obstacles = self.buildEgoCentricRepresentationOfWorld(world)
+        deltaPos, deltaRot, actions = self.brain.takeStep(myTeam, enemyTeam, balls, obstacles)
+        #handle movements
+        if not self.isStunned:
+            #check if agent is within required area
+            if distBetween(self.position, array([0, 0, 0])) < self.maxDistance:
+                self.rotateAgent(deltaRot)
+                self.translateAgent(deltaPos)
+            
+        #handle actions
+        if not self.isStunned:
+            for action in actions:
+                #handle stun action
+                if action.__class__.__name__ == 'Stun':
+                    for agent in world.agents:
+                        if agent.getUID() == action.agentUID:
+                            if distBetween(self.position, agent.position) < self.stunRange:
+                                agent.stun(action.duration)
+                #handle kick action
+                if action.__class__.__name__ == 'Kick':
+                    for ball in world.balls:
+                        if ball.getUID() == action.ballUID:
+                            if distBetween(self.position, ball.position) < 20:
+                                globalDirection = dot(action.direction, rotMatrixFromYPR(self.rotation))
+                                ball.kick(globalDirection, action.intensity)
+        #Unstun Self
+        if self.isStunned:
+            if not (self.lastStunned == -1 and self.stunDuration == -1):
+                if SimTime.time - self.lastStunned > float(self.stunDuration):
+                    self.isStunned = False
+                    self.lastStunned = -1
+                    self.stunDuration = -1
     
