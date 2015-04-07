@@ -28,12 +28,13 @@ def getObstacleAvoidance(obstacles):
 
 
 def findNearestUnstunned(agents):
-    currAgent = agents[0]
+    unstunned = []
     for agent in agents:
         if not agent.isStunned:
-            if np.linalg.norm(agent.position) < np.linalg.norm(currAgent.position):
-                    currAgent = agent
-    return currAgent;
+            unstunned.append(agent)
+    #using a lambda function to get the agent closest
+    minAgent = min(unstunned, key = lambda a: np.linalg.norm(a.position))
+    return minAgent;
 
 
 def getTeamAvoidance(team):
@@ -42,10 +43,8 @@ def getTeamAvoidance(team):
     for agent in team:
         dist = np.linalg.norm(agent.position)
         if dist < checkRange:
-            if(dist < 0.1):
-                dist=0.1
-            vecSum+=normalize(agent.position)*20/dist
-    return vecSum * -1;
+            vecSum += (agent.position * -1)
+    return vecSum ;
 
 def getTeamNearestAvoidance(team):
     currAgent = team[0]

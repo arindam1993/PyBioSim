@@ -33,7 +33,7 @@ class Agent(object):
         self.forward = dot(array([1, 0, 0]), rotMatrixFromYPR(rotation))    #unit vector in forward direction of agent
         self.right = dot(array([0, 1, 0]), rotMatrixFromYPR(rotation))      #unit vector in right direction of agent
         self.up = cross(self.forward, self.right)       #unit vector pointing upwards
-        self.maxMove = double(0.6666)             #max distance the agent can move in each frame
+        self.maxMove = double(1.0)             #max distance the agent can move in each frame
         self.turnRate = turnRate
         self.maxRot = array([turnRate, turnRate, turnRate])           #max YPR in degrees the agent can rotate in each frame
         self.brain = brain
@@ -201,6 +201,7 @@ class RestrictedAgent(Agent):
     
     def __init__(self, team, position, rotation, brain, turnRate, maxDistance, colRadius, drawRadius):
         Agent.__init__(self, team, position, rotation, brain, turnRate, colRadius, drawRadius)
+        self.maxMove = double(0.6666) 
         self.maxDistance = maxDistance
 
     def moveAgent(self, world):

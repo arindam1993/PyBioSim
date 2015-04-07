@@ -20,6 +20,7 @@ from PredatorBrain import PredatorBrain
 from Team import Team
 from SimTime import SimTime
 from StatsTracker import StatsTracker
+import random
 
 
 
@@ -58,15 +59,22 @@ class Simulator(object):
         displacement = array([0, 20, 0])
 
         #initial seed positions
-        predatorPos = array([100, 100, 0])
+        predatorPos = array([20, 0, 0])
         preyPos = array([0, 0, 0])
+
+        #set seed for randomly placing predators
+        random.seed(20)
 
         #initialize predators
         for i in range(0, predatorCount):
             brain = PredatorBrain()
+            x = random.random() * 30
+            y = random.random() * 30
+            z = random.random() * 30
+            newDisplacement = array([x, y, z])
             agent = Agent(predator, predatorPos, array([0, 0, 0]), brain, 5, 5, 5)
             self.world.addAgent(agent)
-            predatorPos+=displacement
+            predatorPos+=newDisplacement
 
         #initialize prey
         for i in range(0, preyCount):
