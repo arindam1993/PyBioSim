@@ -33,7 +33,10 @@ def findNearestUnstunned(agents):
         if not agent.isStunned:
             unstunned.append(agent)
     #using a lambda function to get the agent closest
-    minAgent = min(unstunned, key = lambda a: np.linalg.norm(a.position))
+    if(len(unstunned) > 0):
+        minAgent = min(unstunned, key = lambda a: np.linalg.norm(a.position))
+    else:
+        minAgent = agents[0]
     return minAgent;
 
 
